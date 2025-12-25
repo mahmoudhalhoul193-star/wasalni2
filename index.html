@@ -1,102 +1,16 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>Wasalni - تجربة WhatsApp</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
-body{font-family:'Cairo',sans-serif;margin:0;padding:0;background:#f0f2f5;color:#333;transition:0.3s;}
-body.dark{background:#121212;color:#eee;}
-header{background:#1976d2;color:#fff;padding:30px;text-align:center;border-bottom-left-radius:20px;border-bottom-right-radius:20px;}
-body.dark header{background:#0d47a1;}
-header h1{margin:0;font-size:36px;}
-header p{margin:5px 0 0 0;font-size:16px;opacity:0.9;}
-.container{max-width:900px;margin:20px auto;padding:20px;position:relative;}
-.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.1);margin-bottom:20px;opacity:0;transform:translateY(30px);transition:0.6s;}
-body.dark .card{background:#1e1e1e;color:#eee;}
-.card.show{opacity:1;transform:translateY(0);}
-input,textarea,select,button{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ddd;font-size:15px;transition:.3s;}
-body.dark input,body.dark textarea,body.dark select{background:#333;color:#fff;border:1px solid #555;}
-button{background:#1976d2;color:#fff;border:none;cursor:pointer;transition:.3s;}
-button:hover{background:#0d47a1;}
-.dark-toggle{position:fixed;top:20px;left:20px;background:#333;color:#fff;padding:6px;border:none;border-radius:50%;cursor:pointer;z-index:1000;transition:0.3s;font-size:14px;}
-body.dark .dark-toggle{background:#1976d2;color:#fff;}
-.call-button{position:fixed;bottom:20px;left:20px;background:#25d366;color:#fff;padding:15px;border-radius:50%;font-weight:bold;text-align:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,.3);transition:0.3s;z-index:1000;}
-.call-button:hover{background:#128c4a;transform:scale(1.1);}
-</style>
-</head>
-<body>
-
-<button class="dark-toggle" onclick="toggleDark()">🌙</button>
-
 <header>
-<h1>Wasalni - تجربة WhatsApp</h1>
+<h1>مشورني - تجربة WhatsApp</h1>
 <p>جميع الطلبات الآن عبر WhatsApp</p>
 </header>
-
-<div class="container">
-
-<div class="card show">
-<h2>إضافة سواق</h2>
-<input id="driverName" placeholder="اسم السواق">
-<input id="driverPhone" placeholder="رقم الهاتف">
-<button onclick="addDriver()">تسجيل السواق</button>
-
-<h3>السواقين المسجلين</h3>
-<div id="driversList"></div>
-</div>
-
-<div class="card show" style="transition-delay:.1s">
-<h2>إنشاء طلب</h2>
-<input id="customerName" placeholder="اسم العميل">
-<input id="customerPhone" placeholder="رقم العميل">
-<textarea id="orderDetails" placeholder="تفاصيل الطلب"></textarea>
-<select id="vehicleType">
-<option>موتوسيكل</option>
-<option>سيارة</option>
-<option>فان</option>
-</select>
-<input id="customPrice" type="number" placeholder="اكتب السعر (10 جنيه على الأقل)" min="10">
-<select id="selectDriver">
-<option value="">اختر سواق</option>
-</select>
-<button onclick="addOrder()">إرسال الطلب</button>
-</div>
-
-<div class="card show" style="transition-delay:.2s">
-<h2>تقييمات</h2>
-<label>تقييم التطبيق:</label>
-<select id="appRating">
-<option value="">اختر تقييم التطبيق</option>
-<option value="⭐️">⭐️</option>
-<option value="⭐️⭐️">⭐️⭐️</option>
-<option value="⭐️⭐️⭐️">⭐️⭐️⭐️</option>
-<option value="⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️</option>
-<option value="⭐️⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️⭐️</option>
-</select>
-<label>تقييم السواق:</label>
-<select id="driverRating">
-<option value="">اختر تقييم السواق</option>
-<option value="⭐️">⭐️</option>
-<option value="⭐️⭐️">⭐️⭐️</option>
-<option value="⭐️⭐️⭐️">⭐️⭐️⭐️</option>
-<option value="⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️</option>
-<option value="⭐️⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️⭐️</option>
-</select>
-</div>
-
-<div class="card show" style="transition-delay:.3s">
-<h2>قائمة الطلبات</h2>
-<div class="order-list" id="ordersList"></div>
-</div>
-
-</div>
 
 <script>
 function toggleDark(){document.body.classList.toggle('dark');}
 
-let drivers=[], orders=[];
+let drivers = JSON.parse(localStorage.getItem('drivers')) || [];
+let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+function saveDrivers(){ localStorage.setItem('drivers', JSON.stringify(drivers)); }
+function saveOrders(){ localStorage.setItem('orders', JSON.stringify(orders)); }
 
 function addDriver(){
     const name=document.getElementById('driverName').value;
@@ -105,6 +19,7 @@ function addDriver(){
     drivers.push({name,phone});
     document.getElementById('driverName').value='';
     document.getElementById('driverPhone').value='';
+    saveDrivers();
     renderDrivers();
     updateDriverSelect();
 }
@@ -143,7 +58,7 @@ function addOrder(){
     const driver = drivers[driverIndex];
 
     const msg = encodeURIComponent(`مرحبا ${driver.name}!
-لديك طلب جديد على وصلني 🚀
+لديك طلب جديد على مشورني 🚀
 
 👤 اسم العميل: ${cname}
 📞 رقم العميل: ${cphone}
@@ -160,6 +75,7 @@ function addOrder(){
 
     const order={id:orders.length+1,customerName:cname,customerPhone:cphone,details,vehicle,status:'PENDING',driver:driver,price,appRating,driverRating};
     orders.push(order);
+    saveOrders();
 
     document.getElementById('customerName').value='';
     document.getElementById('customerPhone').value='';
@@ -178,7 +94,9 @@ function renderOrders(){
         list.appendChild(div);
     });
 }
-</script>
 
-</body>
-</html>
+// تحميل البيانات عند فتح الصفحة
+renderDrivers();
+updateDriverSelect();
+renderOrders();
+</script>
