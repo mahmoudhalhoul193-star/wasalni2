@@ -61,6 +61,11 @@ body.dark .dark-toggle{background:#1976d2;color:#fff;}
 <select id="selectDriver">
 <option value="">اختر سواق</option>
 </select>
+<button onclick="addOrder()">إرسال الطلب</button>
+</div>
+
+<div class="card show" style="transition-delay:.2s">
+<h2>تقييمات</h2>
 <label>تقييم التطبيق:</label>
 <select id="appRating">
 <option value="">اختر تقييم التطبيق</option>
@@ -79,10 +84,9 @@ body.dark .dark-toggle{background:#1976d2;color:#fff;}
 <option value="⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️</option>
 <option value="⭐️⭐️⭐️⭐️⭐️">⭐️⭐️⭐️⭐️⭐️</option>
 </select>
-<button onclick="addOrder()">إرسال الطلب</button>
 </div>
 
-<div class="card show" style="transition-delay:.2s">
+<div class="card show" style="transition-delay:.3s">
 <h2>قائمة الطلبات</h2>
 <div class="order-list" id="ordersList"></div>
 </div>
@@ -131,14 +135,13 @@ function addOrder(){
     const appRating=document.getElementById('appRating').value;
     const driverRating=document.getElementById('driverRating').value;
 
-    if(!cname||!cphone||!details||driverIndex===''||isNaN(price)||!appRating||!driverRating){
+    if(!cname||!cphone||!details||driverIndex===''||isNaN(price)){
         alert('اكمل جميع البيانات'); return;
     }
     if(price<10){ alert('السعر يجب أن يكون 10 جنيه على الأقل'); return; }
 
     const driver = drivers[driverIndex];
 
-    // رسالة WhatsApp منسقة
     const msg = encodeURIComponent(`مرحبا ${driver.name}!
 لديك طلب جديد على وصلني 🚀
 
@@ -148,12 +151,11 @@ function addOrder(){
 🚗 نوع المركبة: ${vehicle}
 💰 السعر: ${price} جنيه
 
-تقييم التطبيق: ${appRating}
-تقييمك كسواق: ${driverRating}
+تقييم التطبيق: ${appRating || '-'}
+تقييمك كسواق: ${driverRating || '-'}
 
 💬 يرجى الرد على WhatsApp لتأكيد الطلب.`);
 
-    // فتح WhatsApp مباشرة للسواق
     window.open(`https://wa.me/${driver.phone.replace(/[^0-9]/g,'')}?text=${msg}`, '_blank');
 
     const order={id:orders.length+1,customerName:cname,customerPhone:cphone,details,vehicle,status:'PENDING',driver:driver,price,appRating,driverRating};
@@ -164,8 +166,6 @@ function addOrder(){
     document.getElementById('orderDetails').value='';
     document.getElementById('customPrice').value='';
     document.getElementById('selectDriver').value='';
-    document.getElementById('appRating').value='';
-    document.getElementById('driverRating').value='';
     renderOrders();
 }
 
@@ -174,7 +174,7 @@ function renderOrders(){
     list.innerHTML='';
     orders.forEach(o=>{
         const div=document.createElement('div');
-        div.innerHTML=`<b>${o.customerName}</b> - ${o.details} - ${o.vehicle} - السعر: ${o.price} جنيه - سواق: ${o.driver.name} - تقييم التطبيق: ${o.appRating} - تقييم السواق: ${o.driverRating}`;
+        div.innerHTML=`<b>${o.customerName}</b> - ${o.details} - ${o.vehicle} - السعر: ${o.price} جنيه - سواق: ${o.driver.name} - تقييم التطبيق: ${o.appRating || '-'} - تقييم السواق: ${o.driverRating || '-'} `;
         list.appendChild(div);
     });
 }
